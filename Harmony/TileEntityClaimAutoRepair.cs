@@ -1,5 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System;
+using System.Linq;
+using Random = UnityEngine.Random;
 
 public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 {
@@ -37,7 +41,11 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 	bool hadDamagedBlock = false;
 	bool hadBlockOutside = false;
 
-	private bool isOn;
+    private List<Point3D> points;
+    private int currentPoint;
+    private string logPrefix = "OCB ClaimAutoRepair: ";
+
+    private bool isOn;
 
 	public bool IsOn
 	{
@@ -51,6 +59,7 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 				repairPosition = ToWorldPos();
 				damagePerc = 0.0f;
 				repairDamage = 0.0f;
+				currentPoint = 0;
 				ResetBoundHelper(Color.gray);
 				SetModified();
 			}
@@ -65,9 +74,32 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 		repairBlock = BlockValue.Air;
 		repairDamage = 0.0f;
 		damagePerc = 0.0f;
+		InitPoints();
 	}
 
-	public override TileEntityType GetTileEntityType() => (TileEntityType)242;
+    private void InitPoints()
+    {
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+        points = new List<Point3D>();
+        int maxRadius = ((GameStats.GetInt(EnumGameStats.LandClaimSize) - 1) / 2) + 5;
+        for (int x = -maxRadius; x <= maxRadius; x++)
+        {
+            for (int y = -maxRadius; y <= maxRadius; y++)
+            {
+                for (int z = -maxRadius; z <= maxRadius; z++)
+                {
+                    Point3D point3D = new Point3D() { X = x, Y = y, Z = z, Distance = Math.Max(Math.Abs(x), 1) * Math.Max(Math.Abs(y), 1) * Math.Max(Math.Abs(z), 1) };
+                    points.Add(point3D);
+                }
+            }
+        }
+        points = points.OrderBy(o => o.Distance).ToList();
+        sw.Stop();
+        Log.Out(logPrefix + points.Count + " block list generated in " + sw.ElapsedMilliseconds.ToString() + "ms.");
+    }
+
+    public override TileEntityType GetTileEntityType() => (TileEntityType)242;
 
 	public void ReduceItemCount(Block.SItemNameCount sitem, int count)
 	{
@@ -145,7 +177,25 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 		return true;
 	}
 
-	public Vector3i GetRandomPos(World world, Vector3 pos, int size)
+    public Vector3i GetNextBlock(Vector3 pos)
+    {
+        Vector3i retVal = new Vector3i();
+
+        try
+        {
+            retVal = new Vector3i(pos.x + points[currentPoint].X, pos.y + points[currentPoint].Y, pos.z + points[currentPoint].Z);
+            currentPoint++;
+            if (currentPoint >= points.Count) currentPoint = 0;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(logPrefix + "GetNextBlock");
+            Log.Exception(ex);
+        }
+        return retVal;
+    }
+
+    public Vector3i GetRandomPos(World world, Vector3 pos, int size)
 	{
 		int x = 0; int y = 0; int z = 0;
 		// We don't fix ourself!
@@ -170,9 +220,10 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 
 		Vector3i worldPosI = ToWorldPos();
 		Vector3 worldPos = ToWorldPos().ToVector3();
+        Vector3i nextPos;
 
-		// ToDo: probably don't need to recalculate on each tick since we reset on damage changes
-		damagePerc = (float)repairBlock.damage / (float)Block.list[repairBlock.type].MaxDamage;
+        // ToDo: probably don't need to recalculate on each tick since we reset on damage changes
+        damagePerc = (float)repairBlock.damage / (float)Block.list[repairBlock.type].MaxDamage;
 
 		// Check if we have a block for repair acquired
 		if (repairBlock.type != BlockValue.Air.type)
@@ -261,8 +312,8 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 			{
 
 				// Get a random block and see if it need repair
-				Vector3i randomPos = GetRandomPos(world, worldPos, i);
-				BlockValue blockValue = world.GetBlock(randomPos);
+				nextPos = GetNextBlock(worldPos);
+				BlockValue blockValue = world.GetBlock(nextPos);
 
 				damagePerc = (float)(blockValue.damage) / (float)(Block.list[blockValue.type].MaxDamage);
 
@@ -273,12 +324,12 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 					{
 						// int deadZone = GameStats.GetInt(EnumGameStats.LandClaimDeadZone) + claimSize;
 						Chunk chunkFromWorldPos = (Chunk)world.GetChunkFromWorldPos(worldPosI);
-						if (!IsBlockInsideClaim(world, chunkFromWorldPos, randomPos, playerData, claimSize, true))
+						if (!IsBlockInsideClaim(world, chunkFromWorldPos, nextPos, playerData, claimSize, true))
 						{
 							// Check if the block is close by, which suggests a missing land claim block?
-							if (Mathf.Abs(randomPos.x - worldPos.x) < claimSize / 2 &&
-								Mathf.Abs(randomPos.y - worldPos.y) < claimSize / 2 &&
-								Mathf.Abs(randomPos.z - worldPos.z) < claimSize / 2)
+							if (Mathf.Abs(nextPos.x - worldPos.x) < claimSize / 2 &&
+								Mathf.Abs(nextPos.y - worldPos.y) < claimSize / 2 &&
+								Mathf.Abs(nextPos.z - worldPos.z) < claimSize / 2)
 									hadBlockOutside = true;
 							// Skip it
 							continue;
@@ -287,7 +338,7 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 						world.GetGameManager().PlaySoundAtPositionServer(worldPos,
 							"timer_stop", AudioRolloffMode.Logarithmic, 100);
 						// Acquire the block to repair
-						repairPosition = randomPos;
+						repairPosition = nextPos;
 						repairBlock = blockValue;
 						repairDamage = 0.0f;
 						hadDamagedBlock = false;
