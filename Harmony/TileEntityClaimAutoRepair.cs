@@ -96,7 +96,7 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
         }
         points = points.OrderBy(o => o.Distance).ToList();
         sw.Stop();
-        Log.Out(logPrefix + points.Count + " block list generated in " + sw.ElapsedMilliseconds.ToString() + "ms.");
+        Log.Out(logPrefix + points.Count + " block list, with a boundary of " + ((maxRadius*2)+1).ToString() + ", generated in " + sw.ElapsedMilliseconds.ToString() + " ms.");
     }
 
     public override TileEntityType GetTileEntityType() => (TileEntityType)242;
