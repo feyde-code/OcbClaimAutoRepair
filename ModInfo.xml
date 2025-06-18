@@ -3,7 +3,6 @@
 	<Name value="OcbClaimAutoRepair" />
 	<DisplayName value="OCB Claim Auto Repair Block" />
 	<Description value="Auto repairs blocks in your claim vicinity" />
-	<Website value="https://github.com/OCB7D2D/OcbClaimAutoRepair" />
-	<Author value="ocbMaurice" />
-	<Version value="0.9.2" />
+	<Author value="Feyde" />
+	<Version value="1.1" />
 </xml>

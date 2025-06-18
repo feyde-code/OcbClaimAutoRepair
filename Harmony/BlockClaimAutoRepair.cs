@@ -93,12 +93,13 @@ public class BlockClaimAutoRepair : BlockSecureLoot
 		base.OnBlockEntityTransformAfterActivated(_world, _blockPos, _cIdx, _blockValue, _ebcd);
 	}
 
-	// Copied from vanilla BlockLandClaim code
-	public override void OnBlockAdded(
+    // Copied from vanilla BlockLandClaim code
+    public override void OnBlockAdded(
 		WorldBase _world,
 		Chunk _chunk,
 		Vector3i _blockPos,
-		BlockValue _blockValue)
+		BlockValue _blockValue,
+        PlatformUserIdentifierAbs _addedByPlayer)
 	{
 		if (_blockValue.ischild || _world.GetTileEntity(_chunk.ClrIdx, _blockPos) is TileEntityClaimAutoRepair)
 			return;
@@ -113,7 +114,7 @@ public class BlockClaimAutoRepair : BlockSecureLoot
 		tileEntity.SetContainerSize(LootSize, false);
 		_chunk.AddTileEntity(tileEntity);
 
-		base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue);
+		base.OnBlockAdded(_world, _chunk, _blockPos, _blockValue, _addedByPlayer);
 		if (GameManager.IsDedicatedServer) return;
 		if (_world.GetTileEntity(_chunk.ClrIdx, _blockPos) is TileEntityClaimAutoRepair tileEntityLandAutoRepair)
 		{

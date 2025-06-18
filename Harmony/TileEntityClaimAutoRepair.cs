@@ -424,25 +424,25 @@ public class TileEntityClaimAutoRepair : TileEntitySecureLootContainer
 	public override void write(PooledBinaryWriter _bw, TileEntity.StreamModeWrite _eStreamMode)
 	{
 		base.write(_bw, _eStreamMode);
-		_bw.Write(isOn);
+		_bw.Write(_value: isOn);
 		switch (_eStreamMode)
 		{
 			case TileEntity.StreamModeWrite.Persistency:
 				break;
 			case TileEntity.StreamModeWrite.ToServer:
-				_bw.Write(IsUserAccessing());
+				_bw.Write(_value: IsUserAccessing());
 				break;
 			case TileEntity.StreamModeWrite.ToClient:
-				_bw.Write(repairBlock.type != BlockValue.Air.type);
-				_bw.Write(this.repairPosition.x);
-				_bw.Write(this.repairPosition.y);
-				_bw.Write(this.repairPosition.z);
-				_bw.Write(this.hadDamagedBlock);
-				_bw.Write(this.hadBlockOutside);
-				_bw.Write(this.lastMissingItem != null);
+				_bw.Write(_value: repairBlock.type != BlockValue.Air.type);
+				_bw.Write(_value: this.repairPosition.x);
+				_bw.Write(_value: this.repairPosition.y);
+				_bw.Write(_value: this.repairPosition.z);
+				_bw.Write(_value: this.hadDamagedBlock);
+				_bw.Write(_value: this.hadBlockOutside);
+				_bw.Write(_value: this.lastMissingItem != null);
 				if (this.lastMissingItem != null)
-					_bw.Write(this.lastMissingItem);
-				_bw.Write(repairDamage / repairBlock.damage);
+					_bw.Write(_value: this.lastMissingItem);
+				_bw.Write(_value: repairDamage / repairBlock.damage);
 				break;
 		}
 	}
