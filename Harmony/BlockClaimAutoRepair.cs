@@ -8,7 +8,7 @@ public class BlockClaimAutoRepair : BlockSecureLoot
 
 	private float BoundHelperSize = 1.035f;
 
-	private float RepairSpeed = 2000f;
+	private float RepairSpeed = 4000f;
 
 	private float TakeDelay = 30f;
 
