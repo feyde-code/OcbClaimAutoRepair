@@ -56,7 +56,7 @@ but repair should still work (and be faster).
 
 I've made some measurements and will gladly report my findings, although yours
 may vary for whatever reason (calculations are tick and time delta based).
-Internally the repair speed is currently set to `4000f` (just a factor).
+Internally the repair speed is currently set to `12000f` (just a factor).
 With that base factor you can expect around the following repair speeds:
 
 - Each tick (sound you hear) it repairs around 65 hit-points

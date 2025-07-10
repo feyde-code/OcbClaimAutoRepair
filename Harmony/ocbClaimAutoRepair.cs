@@ -8,7 +8,7 @@ public class OcbClaimAutoRepair : IModApi
 	// Entry class for A20 patching
 	public void InitMod(Mod mod)
 	{
-		Log.Out("OCB Harmony Patch: " + GetType().ToString());
+		ModConfig.Load();
 		Harmony harmony = new Harmony(GetType().ToString());
 		harmony.PatchAll(Assembly.GetExecutingAssembly());
 	}

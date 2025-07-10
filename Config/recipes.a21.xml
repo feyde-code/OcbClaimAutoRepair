@@ -4,7 +4,6 @@
 			<ingredient name="resourceForgedSteel" count="40"/>
 			<ingredient name="resourceElectricParts" count="20"/>
 			<ingredient name="gunBotRoboticsParts" count="6"/>
-			<ingredient name="carBattery" count="1"/>
 			<ingredient name="solarCell" count="1"/>
 		</recipe>
 	</append>

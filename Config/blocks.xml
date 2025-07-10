@@ -22,9 +22,7 @@
 			<property name="DisplayType" value="blockHardened"/>
 
 			<property name="CanPickup" value="true"/>
-			<property name="TakeDelay" value="30"/>
-
-			<property name="ClaimAutoRepairSpeedFactor" value="4000"/>
+			<property name="TakeDelay" value="15"/>
 		</block>
 	</append>
 
